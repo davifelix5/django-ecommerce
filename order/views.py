@@ -1,15 +1,19 @@
 from django.shortcuts import render
 from django.views.generic import ListView
 from django.views import View
+from django.http import HttpResponse
 
 
 class Pay(View):
-    pass
+    def get(self, *args, **kwargs):
+        return HttpResponse('Pay')
 
 
 class Finish(View):
-    pass
+    def get(self, *args, **kwargs):
+        return HttpResponse('Finish')
 
 
 class Details(View):
-    pass
+    def get(self, *args, **kwargs):
+        return HttpResponse('Details')
