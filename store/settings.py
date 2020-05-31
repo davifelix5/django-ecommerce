@@ -41,8 +41,24 @@ INSTALLED_APPS = [
     'product.apps.ProductConfig',
     'order.apps.OrderConfig',
     'profiles.apps.ProfilesConfig',
+    'django_summernote',
     'debug_toolbar',
 ]
+
+X_FRAME_OPTIONS = 'SAMEORIGIN'
+
+SUMMERNOTE_CONFIG = {
+    'toolbar': [
+        ['style', ['style']],
+        ['font', ['bold', 'underline', 'italic', 'backcolor']],
+        ['fontname', ['fontname']],
+        ['color', ['color']],
+        ['para', ['ul', 'ol', 'paragraph']],
+        ['table', ['table']],
+        ['insert', ['link', 'picture', 'video']],
+        ['view', ['fullscreen', 'help', 'undo', 'redo']],
+    ],
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
