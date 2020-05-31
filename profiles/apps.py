@@ -3,4 +3,4 @@ from django.apps import AppConfig
 
 class ProfilesConfig(AppConfig):
     name = 'profiles'
-    verbose_name = 'perfis'
+    verbose_name = 'Perfis'
