@@ -17,24 +17,24 @@
                 <div class="mt-4 mt-lg-0">
                     <h1 class="h2">{{ product.name }}</h1>
                     <p class="lead">T{{ product.short_desc }}</p>
-                    <p class="lead">
+                    <p class="lead prices">
                         {% if selected_variation.price_promo %}
-                            <span id="selected_variation-preco-promocional"
-                                class="lead product-price">
+                            <span
+                                class="lead product-price mr-1">
                                     {{ selected_variation.price_promo|money }}
                             </span>
-                            <span id="selected_variation-preco" class="lead product-old-price text-muted">
+                            <span class="lead product-old-price text-muted">
                                 {{ selected_variation.price|money }}
                             </span>
                         {% else %}
-                            <span id="selected_variation-preco" class="lead product-price">{{ selected_variation.price|money }}</span>
+                            <span class="lead product-price">{{ selected_variation.price|money }}</span>
                         {% endif %}
                     </p>
 
                     <form action="{% url 'product:cart_add' %}" id="form-add-to-cart">
                         <div class="form-group">
                             {% if product.prod_type == 'V' %}
-                            <select id="select-variacoes" name="vid" class="form-control form-control-lg">
+                            <select id="select_variations" name="vid" class="form-control form-control-lg">
                             {% for variation in variations %}
                                 <option 
                                     promotional-price="{% if variation.price_promo %}{{  variation.price_promo|money }}{% else %}null{% endif %}" 
@@ -66,7 +66,7 @@
 
         <div class="row">
             <div class="col-lg-12">
-                <div class="mt-5 mb-5">
+                <div class="mt-3 mb-3">
                     <h2 class="text-center">Descrição do produto</h2>
                     <div class="mt-4">
                         {{ product.long_desc|safe }}

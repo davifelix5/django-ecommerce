@@ -1,30 +1,28 @@
 (function () {
-    variations_form = document.getElementById('select-variacoes');
-    original_price = document.getElementById('variation-preco');
-    promotional_price = document.getElementById('variation-preco-promocional');
-
-    if (!variations_form) {
-        return;
-    }
-
-    if (!original_price) {
-        return;
-    }
+    variations_form = document.getElementById('select_variations');
+    prices_area = document.querySelector('.prices');
 
     variations_form.addEventListener('change', function () {
-        preco = this.options[this.selectedIndex].getAttribute('original-price');
-        preco_promocional = this.options[this.selectedIndex].getAttribute('promotional-price');
+        prices_area.innerHTML = '';
+        price = this.options[this.selectedIndex].getAttribute('original-price');
+        promotional_price = this.options[this.selectedIndex].getAttribute('promotional-price');
 
-        original_price.innerHTML = preco;
+        normal_price = document.createElement('span');
+        normal_price.innerHTML = price;
 
-        if (preco_promocional != "null") {
-            original_price.classList = 'lead product-old-price text-muted';
-            promotional_price.innerHTML = preco_promocional;
+        if (promotional_price !== "null") {
+            promo = document.createElement('span');
+            promo.innerHTML = promotional_price;
+            promo.classList = 'lead product-price mr-1';
+
+            normal_price.classList = 'lead product-old-price text-muted';
+            prices_area.appendChild(promo);
+
+        } else {
+            normal_price.classList = 'lead product-price';
         }
-        if (preco_promocional == "null") {
-            promotional_price.innerHTML = ""
-            original_price.classList = 'lead product-price';
-        }
+
+        prices_area.appendChild(normal_price);
     })
 })();
 
