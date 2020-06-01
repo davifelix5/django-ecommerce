@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block 'profile_active' %}
+active
+{% endblock 'profile_active' %}
+
+{% block 'content' %}
+
+    <div class="row">
+        
+        <div class="col-lg">
+            <h1 class="mb-1 text-primary text-center">Login</h1>
+        </div>
+        
+        <div class="col-lg">
+            
+            <h1 class="mb-1 text-primary text-center">Cadastro</h1>
+            <p class="text-muted text-sm mb-2 text-center">
+                Faça seu cadastro caso ainda não tenha uma conta
+            </p>
+            
+            <form method="post">
+                {% csrf_token %}
+                
+                <fieldset>
+                    <legend class="text-center">Dados de cadastro</legend>
+                    {{ userform|crispy }}
+                    {{ profileform|crispy }}
+                </fieldset>
+
+                <fieldset>
+                    <legend class="text-center">Prinpal endereço</legend>
+                    {{ addressform|crispy }}
+                </fieldset>
+                
+                <div class="row">
+                    <div class="col">
+                        <button type="submit" class="btn btn-primary btn-block btn-lg">
+                            Cadastrar
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+{% endblock 'content' %}

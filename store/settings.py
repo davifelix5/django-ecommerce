@@ -42,8 +42,11 @@ INSTALLED_APPS = [
     'order.apps.OrderConfig',
     'profiles.apps.ProfilesConfig',
     'django_summernote',
+    'crispy_forms',
     'debug_toolbar',
 ]
+
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 X_FRAME_OPTIONS = 'SAMEORIGIN'
 

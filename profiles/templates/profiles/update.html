@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block 'profile_active' %}
+active
+{% endblock 'profile_active' %}
+
+{% block 'content' %}
+
+    <h1 class="text-center text-primary mb-2">
+        Mudança nos dados do cadastro
+    </h1>
+
+<div class="row">
+
+    <div class="col-lg">
+
+        <form method="POST">
+        {% csrf_token %}
+
+            <fieldset>
+                <legend> Informações de usuário </legend>
+                {{ userform|crispy }}
+                {{ profileform|crispy }}
+            </fieldset>
+            
+            <fieldset>
+                <legend>Informações de endereço</legend>
+                {{ addressform|crispy }}
+            </fieldset>
+            <button type="submit" class="btn btn-primary btn-block btn-lg">
+                Mudar
+            </button>
+
+        </form>
+    
+    </div>
+
+</div>
+
+{% endblock 'content' %}
