@@ -81,3 +81,9 @@ ul.errorlist li {
 .cart-img {
     max-width: 150px;
 }
+
+.underline {
+    text-decoration: underline !important;
+}
+
+.cart-links { display: grid; grid-template-columns: 80% 20%; grid-gap: 5px; }

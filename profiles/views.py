@@ -3,8 +3,9 @@ from django.views.generic import ListView
 from django.views import View
 from django.http import HttpResponse
 from django.contrib import messages
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
+from copy import deepcopy
 from . import models
 from . import forms
 
@@ -90,8 +91,7 @@ class SignIn(View):
 
 class Update(View):
 
-    # TODO Dar a opção de listar quan mais de um endereço
-    # TODO Dar a opção de adicionar endereços
+    # TODO Dar a opção de listar e adicionar mais de um endereço
 
     template_name = 'profiles/update.html'
 
@@ -122,11 +122,13 @@ class Update(View):
         self.profileform = self.context.get('profileform')
         self.addressform = self.context.get('addressform')
 
+        self.redirect = 'profile:update'
+
     def get(self, *args, **kwargs):
         return render(self.request, self.template_name, self.context)
 
     def post(self, *args, **kwargs):
-        # TODO fazer a funionalidade de mudar dados do usuário
+
         if not self.userform.is_valid() or \
             not self.profileform.is_valid() or \
                 not self.addressform.is_valid():
@@ -146,6 +148,7 @@ class Update(View):
                 messages.INFO,
                 'Sua senha foi alterada. Logue novamente'
             )
+            self.redirect = 'product:list'
         self.user.save()
 
         if not self.profile:
@@ -161,22 +164,55 @@ class Update(View):
             self.address.user = self.profile
             self.address.save()
 
-        
-
         messages.add_message(
             self.request,
             messages.SUCCESS,
             'Usuário mudado com sucesso'
         )
 
-        return redirect('profile:update')
+        return redirect(self.redirect)
 
 
 class Login(View):
+
+    def setup(self, *args, **kwargs):
+        super().setup(*args, **kwargs)
+
+        self.login_form = forms.LoginForm(self.request.POST or None)
+        self.render = render(self.request, 'profiles/login.html', {
+            'form_login': self.login_form
+        })
+
     def get(self, *args, **kwargs):
-        return HttpResponse('Login')
+        return self.render
+
+    def post(self, *args, **kwargs):
+        if not self.login_form.is_valid():
+            messages.add_message(self.request, messages.ERROR,
+                                 'Erro. Informe seus dados novamente')
+            return redirect('profile:login')
+
+        username = self.login_form.cleaned_data.get('username')
+        password = self.login_form.cleaned_data.get('password')
+        user = authenticate(self.request, username=username, password=password)
+        if user:
+            login(self.request, user)
+            messages.add_message(
+                self.request, messages.SUCCESS, 'Logado com sucesso')
+            return redirect('product:list')
+
+        messages.add_message(self.request, messages.ERROR,
+                             'Dados incorretos! Tente novamente.')
+        return redirect('product:login')
 
 
 class Logout(View):
+
     def get(self, *args, **kwargs):
-        return HttpResponse('Logout')
+        cart = self.request.session.get('cart')
+        if cart:
+            copy_cart = deepcopy(cart)
+        logout(self.request)
+        if copy_cart:
+            self.request.session['cart'] = copy_cart
+        return redirect('profile:login')

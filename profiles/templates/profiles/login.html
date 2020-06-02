@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block 'content' %}
+
+<div class="row">
+    <div class="col" style="margin: 0 15%">
+        <h1 class="text-center text-primary">Login</h1>
+        <p class="text-muted text-sm mb-2 text-center">
+            Insira seus dados abaixo
+        </p>
+        <form method="POST">
+        {% csrf_token %}
+            {{ form_login|crispy }}
+            <button class="btn btn-primary btn-lg btn-block" type="submit">
+                Entrar
+            </button>
+        </form>
+        <div class="d-flex flex-row justify-content-center">
+        <p class="text-sm text-muted mt-3 mb-1">Não tem cadastro? <a href="{% url 'profile:signin' %}" class="underline center">Registre-se aqui</a></p>
+        </div>
+    </div>
+</div>
+
+{% endblock 'content' %}

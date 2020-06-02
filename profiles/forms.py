@@ -49,8 +49,6 @@ class UserForm(forms.ModelForm):
             self.error_messages['email'] = 'Esse email já foi cadastrado'
 
     def validate_password(self, pass1, pass2):
-        if not pass1 or not pass2:
-            return
         if pass1 != pass2:
             self.error_messages['password'] = 'Senhas informandas não coincidem'
         else:
@@ -112,6 +110,11 @@ class UserFormUpdate(UserForm):
         help_text='Deixe vazio para não alterar sua senha'
     )
 
+    def validate_password(self, pass1, pass2):
+        if not pass1 or not pass2:
+            return
+        super().validate_password(pass1, pass2)
+
     def template_method(self, user, email, password1, password2):
         self.validate_password(password1, password2)
 
@@ -122,3 +125,46 @@ class AddressForm(forms.ModelForm):
         model = models.Address
         fields = '__all__'
         exclude = ['user']
+
+
+class LoginForm(forms.ModelForm):
+
+    username = forms.CharField(
+        max_length=255,
+        required=True,
+        widget=forms.TextInput(),
+        label="Nome de usuário"
+    )
+
+    password = forms.CharField(
+        required=True,
+        widget=forms.PasswordInput(),
+        label='Senha',
+    )
+
+    password2 = forms.CharField(
+        required=True,
+        widget=forms.PasswordInput(),
+        label='Repita sua senha',
+    )
+
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'password']
+
+    def clean(self):
+        raw_data = self.data
+        clean_data = self.cleaned_data
+        pass1 = clean_data.get('password')
+        pass2 = clean_data.get('password2')
+        print(pass1, pass2)
+        error_msgs = {}
+
+        if pass1 != pass2:
+            error_msgs['password'] = 'As senhas não coincidem'
+        else:
+            if len(pass1) < 6:
+                error_msgs['password2'] = 'As senhas devem ser maiores que 6 caracteres'
+
+        if error_msgs:
+            raise ValidationError(error_msgs)
