@@ -68,7 +68,7 @@ class Address(models.Model):
     user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     street = models.CharField(max_length=50, verbose_name="Rua")
     number = models.CharField(max_length=5, verbose_name="Número")
-    complement = models.CharField(max_length=30, verbose_name="Complemento")
+    complement = models.CharField(max_length=30, verbose_name="Complemento", blank=True, null=True)
     neighbourhood = models.CharField(max_length=30, verbose_name="Bairro")
     cep = models.CharField(max_length=8, verbose_name="CEP")
     city = models.CharField(max_length=30, verbose_name="Cidade")

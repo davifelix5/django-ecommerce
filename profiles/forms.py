@@ -167,4 +167,5 @@ class LoginForm(forms.ModelForm):
                 error_msgs['password2'] = 'As senhas devem ser maiores que 6 caracteres'
 
         if error_msgs:
+            print('oi')
             raise ValidationError(error_msgs)

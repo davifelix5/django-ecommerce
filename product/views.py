@@ -3,10 +3,11 @@ from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.views import View
 from django.contrib import messages
+from django.utils.decorators import method_decorator
+from django.contrib.auth.decorators import login_required
 from . import models
 from . import product_services
-from django.http import HttpResponse
-from pprint import pprint
+from profiles import profile_services
 
 
 class ListProducts(ListView):
@@ -50,9 +51,9 @@ class AddToCart(View):
     """
 
     def get(self, *args, **kwargs):
-        """
-        Encapsular função que recebe o variation ID e retorna para o carrinho
-        """
+        # TODO Tentar colocar o índide da variação mais barata no list
+        # TODO Adicionar ao carrinho pela página de carrinho
+        # TODO Parar de passar a request pro product_services
         previous_url = self.request.META.get('HTTP_REFERER')
         variation_id = self.request.GET.get('vid')
 
@@ -74,10 +75,10 @@ class AddToCart(View):
 
         cart = product_services.add_to_cart(self.request, variation_id)
 
-        messages.add_message(self.request, messages.SUCCESS,
-                             'Produto adicionado ao carrinho!')
+        if cart:
+            messages.add_message(self.request, messages.SUCCESS,
+                                 'Produto adicionado ao carrinho!')
 
-        pprint(cart)
         return redirect(previous_url)
 
 
@@ -131,4 +132,15 @@ class RemoveFromCart(View):
 
 class OrderInfo(View):
     def get(self, *args, **kwargs):
-        return HttpResponse('Final do pedido')
+        if not self.request.user.is_authenticated:
+            self.request.session['next_page'] = 'product:info'
+            return redirect('profile:login')
+        if not self.request.session.get('cart'):
+            messages.info(self.request, 'Adicione produtos ao seu carrinho!')
+            return redirect('product:list')
+        self.context = {
+            'user': self.request.user,
+            'cart': self.request.session.get('cart'),
+            'address': profile_services.get_addresses(self.request.user)[0]
+        }
+        return render(self.request, 'product/order_info.html', self.context)

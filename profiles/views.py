@@ -31,7 +31,7 @@ class SignIn(View):
 
     def post(self, *args, **kwargs):
 
-        if self.request.user:
+        if self.request.user.is_authenticated:
             messages.add_message(
                 self.request,
                 messages.WARNING,
@@ -86,7 +86,7 @@ class SignIn(View):
         if auth:
             login(self.request, user=user)
 
-        return redirect('profile:signin')
+        return redirect('procuct:list')
 
 
 class Update(View):
@@ -177,42 +177,45 @@ class Login(View):
 
     def setup(self, *args, **kwargs):
         super().setup(*args, **kwargs)
-
         self.login_form = forms.LoginForm(self.request.POST or None)
-        self.render = render(self.request, 'profiles/login.html', {
-            'form_login': self.login_form
-        })
+        self.context = {'form_login': self.login_form}
 
     def get(self, *args, **kwargs):
-        return self.render
+        return render(self.request, 'profiles/login.html', self.context)
 
     def post(self, *args, **kwargs):
         if not self.login_form.is_valid():
-            messages.add_message(self.request, messages.ERROR,
-                                 'Erro. Informe seus dados novamente')
-            return redirect('profile:login')
+            messages.warning(self.request, 'Atenção! Corrija os erros abaixo.')
+            return render(self.request, 'profiles/login.html', self.context)
 
         username = self.login_form.cleaned_data.get('username')
         password = self.login_form.cleaned_data.get('password')
         user = authenticate(self.request, username=username, password=password)
         if user:
             login(self.request, user)
+
+            if self.request.session.get('next_page'):
+                messages.success(
+                    self.request, 'Logado com sucesso. Continua sua compra!')
+                del self.request.session['next_page']
+                return redirect('product:info')
+
             messages.add_message(
                 self.request, messages.SUCCESS, 'Logado com sucesso')
             return redirect('product:list')
 
         messages.add_message(self.request, messages.ERROR,
                              'Dados incorretos! Tente novamente.')
-        return redirect('product:login')
+
+        return self.request.session.get('next_page', 'profile:login')
 
 
 class Logout(View):
 
     def get(self, *args, **kwargs):
-        cart = self.request.session.get('cart')
-        if cart:
-            copy_cart = deepcopy(cart)
+        # TODO Dar a opção de listar e adicionar mais de um endereço
+        cart = self.request.session.get('cart', '')
+        copy_cart = deepcopy(cart)
         logout(self.request)
-        if copy_cart:
-            self.request.session['cart'] = copy_cart
+        self.request.session['cart'] = copy_cart
         return redirect('profile:login')

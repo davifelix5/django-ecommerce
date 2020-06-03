@@ -51,7 +51,7 @@ def add_to_cart(request, pk):
             messages.add_message(request, messages.WARNING,
                                  f'Estoque insuficiente para o produto "{product.name}"')
 
-            return redirect(previous_url)
+            return False
 
         cart[pk]['amount'] = amount
         cart[pk]['subtotal'] = price * amount
@@ -74,4 +74,4 @@ def add_to_cart(request, pk):
         }
 
     request.session.save()
-    return cart
+    return True

@@ -147,6 +147,8 @@ USE_L10N = True
 
 USE_TZ = True
 
+LOGIN_URL = 'profile:login'
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
@@ -154,14 +156,14 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATICFILES_DIRS = [
-    'templates/static'
+    os.path.join(BASE_DIR, 'templates/static')
 ]
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 MESSAGE_TAGS = {
-    constants.ERROR: 'alert-error',
+    constants.ERROR: 'alert-danger',
     constants.WARNING: 'alert-warning',
     constants.DEBUG: 'alert-info',
     constants.INFO: 'alert-info',
