@@ -7,7 +7,7 @@
         <h2>Resumo da sua compra</h2>
 
         <p class="lead">Dados do usuário</p>
-        <p>Caso precise editar, <a href="/userprofile/update/">clique aqui</a></p>
+        <p>Caso precise editar, <a href="{% url 'profile:update' %}">clique aqui</a></p>
         <dl class="row">
             <dt class="col-lg-2">Nome:</dt>
             <dd class="col-lg-4">{{ user.first_name }}</dd>
@@ -23,27 +23,60 @@
             <dd class="col-lg-4">{{ user.email }}</dd>
         </dl>
 
-        <p class="lead">Dados de endereço</p>
+        <p class="lead">Endereço selecionado</p>
         <p>Caso precise editar, <a href="{% url 'profile:update' %}">clique aqui</a></p>
         <dl class="row">
+        
             <dt class="col-lg-2">Endereço:</dt>
-            <dd class="col-lg-4">{{address.street }}</dd>
+            <dd class="col-lg-4">{{main_address.street }}</dd>
             <dt class="col-lg-2">Número:</dt>
-            <dd class="col-lg-4">{{address.number }}</dd>
+            <dd class="col-lg-4">{{main_address.number }}</dd>
 
             <dt class="col-lg-2">Complemento:</dt>
-            <dd class="col-lg-4">{{ address.complement }}</dd>
+            <dd class="col-lg-4">{{ main_address.complement }}</dd>
             <dt class="col-lg-2">Bairro:</dt>
-            <dd class="col-lg-4">{{ address.neighbourhood }}</dd>
+            <dd class="col-lg-4">{{ main_address.neighbourhood }}</dd>
 
             <dt class="col-lg-2">Cidade:</dt>
-            <dd class="col-lg-4">{{address.city}}</dd>
+            <dd class="col-lg-4">{{main_address.city}}</dd>
             <dt class="col-lg-2">Estado:</dt>
-            <dd class="col-lg-4">{{address.federation}}</dd>
+            <dd class="col-lg-4">{{main_address.federation}}</dd>
 
             <dt class="col-lg-2">CEP:</dt>
-            <dd class="col-lg-4">{{address.cep}}</dd>
+            <dd class="col-lg-4">{{main_address.cep}}</dd>
         </dl>
+        {% if other_addresses %}
+        <p>Seguem outros de seus endereços que você possa querer:</p>
+        <div class="d-flex flex-row align-items-start">
+            <form action="{% url 'product:info' %}" method="GET">
+                
+                {% for address in other_addresses %}
+                <dl class="row backupAddress hidden" address="{{address.id}}">
+            
+                    <dt class="col-lg-2">Endereço:</dt>
+                    <dd class="col-lg-4">{{address.street }}</dd>
+                    <dt class="col-lg-2">Número:</dt>
+                    <dd class="col-lg-4">{{address.number }}</dd>
+
+                    <dt class="col-lg-2">Cidade:</dt>
+                    <dd class="col-lg-4">{{address.city}}</dd>
+
+                    <dt class="col-lg-2">CEP:</dt>
+                    <dd class="col-lg-4">{{address.cep}}</dd>
+                </dl>
+                {% endfor %}
+                <select name="changeAddress" id="changeAddress"  class="mb-3">
+                    <option>Selecionar endereços</option>
+                    {% for address in other_addresses %}
+                    <option value="{{address.id}}">{{address.street}}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn btn-sm btn-secondary hidden" id="submitChangeAddress">
+                    Selecionar esse endereço
+                </button>
+            </form>
+        </div>
+        {% endif %}
     </div>
 </div>
 

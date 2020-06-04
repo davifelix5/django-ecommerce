@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect, reverse
+from django.shortcuts import render, redirect, reverse, get_object_or_404
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.views import View
@@ -7,7 +7,6 @@ from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
 from . import models
 from . import product_services
-from profiles import profile_services
 
 
 class ListProducts(ListView):
@@ -131,16 +130,33 @@ class RemoveFromCart(View):
 
 
 class OrderInfo(View):
+
     def get(self, *args, **kwargs):
+
         if not self.request.user.is_authenticated:
             self.request.session['next_page'] = 'product:info'
             return redirect('profile:login')
+
         if not self.request.session.get('cart'):
             messages.info(self.request, 'Adicione produtos ao seu carrinho!')
             return redirect('product:list')
+
+        self.addresses = self.request.user.userprofile.address_set
         self.context = {
             'user': self.request.user,
             'cart': self.request.session.get('cart'),
-            'address': profile_services.get_addresses(self.request.user)[0]
+            'main_address': self.addresses.all().first(),
+            'other_addresses': self.addresses.all()[1:]
         }
+
+        address = self.request.GET.get('changeAddress')
+        if address:
+            address = int(address)
+            self.context['main_address'] = self.addresses.filter(
+                id=address).first()
+
+        if not self.request.session.get('cart'):
+            messages.info(self.request, 'Adicione produtos ao seu carrinho!')
+            return redirect('product:list')
+
         return render(self.request, 'product/order_info.html', self.context)
