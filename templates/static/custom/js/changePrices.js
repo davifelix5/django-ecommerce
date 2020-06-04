@@ -25,4 +25,3 @@
         prices_area.appendChild(normal_price);
     })
 })();
-

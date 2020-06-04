@@ -1,9 +1,11 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.http import HttpResponseRedirect
+from django.shortcuts import render, redirect, get_object_or_404, reverse
 from django.views.generic import ListView
 from django.views import View
 from django.http import HttpResponse
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from copy import deepcopy
 from . import models
@@ -101,7 +103,7 @@ class Update(View):
         self.user = get_object_or_404(
             User, username=self.request.user.username)
         self.profile = get_object_or_404(models.UserProfile, user=self.user)
-        self.address = get_object_or_404(models.Address, user=self.profile)
+        self.addresses = self.user.userprofile.address_set.all()
 
         self.context = {
             'userform': forms.UserFormUpdate(
@@ -112,26 +114,29 @@ class Update(View):
                 self.request.POST or None,
                 instance=self.profile
             ),
-            'addressform': forms.AddressForm(
-                self.request.POST or None,
-                instance=self.address
-            ),
+            'main_address': self.addresses.first(),
+            'other_addresses': self.addresses[1:]
         }
 
         self.userform = self.context.get('userform')
         self.profileform = self.context.get('profileform')
-        self.addressform = self.context.get('addressform')
 
         self.redirect = 'profile:update'
 
     def get(self, *args, **kwargs):
+        print('oi')
+        edit_id = self.request.GET.get('changeAddress')
+        if edit_id:
+            print('oi')
+            return HttpResponseRedirect(reverse('profile:edit_address', kwargs={'pk': int(edit_id)}))
+
         return render(self.request, self.template_name, self.context)
 
     def post(self, *args, **kwargs):
+        print('posting')
 
         if not self.userform.is_valid() or \
-            not self.profileform.is_valid() or \
-                not self.addressform.is_valid():
+                not self.profileform.is_valid():
 
             print('Ficou inválido')
             return redirect('profile:update')
@@ -148,6 +153,7 @@ class Update(View):
                 messages.INFO,
                 'Sua senha foi alterada. Logue novamente'
             )
+            # Caso a senha tenha sido alterada, precisa logar denovo
             self.redirect = 'product:list'
         self.user.save()
 
@@ -159,10 +165,6 @@ class Update(View):
             self.profile = self.profileform.save(commit=False)
             self.profile.user = self.user
             self.profile.save()
-
-            self.address = self.addressform.save(commit=False)
-            self.address.user = self.profile
-            self.address.save()
 
         messages.add_message(
             self.request,
@@ -208,6 +210,52 @@ class Login(View):
                              'Dados incorretos! Tente novamente.')
 
         return self.request.session.get('next_page', 'profile:login')
+
+
+class NewAddress(View):
+
+    def setup(self, *args, **kwargs):
+        super().setup(*args, **kwargs)
+        self.context = {
+            'address_form': forms.AddressForm(self.request.POST or None)
+        }
+        self.address_form = self.context.get('address_form')
+
+    def get(self, *args, **kwargs):
+        return render(self.request, 'profiles/new_address.html', self.context)
+
+    def post(self, *args, **kwargs):
+        if not self.address_form.is_valid():
+            messages.warning(self.request, 'Preencha os campos corretamente')
+            return render(self.request, 'profiles/new_address.html', self.context)
+
+        address = self.address_form.save(commit=False)
+        address.user = self.request.user.userprofile
+        address.save()
+        messages.success(self.request, 'Endereço adicionado')
+        return redirect('profile:update')
+
+
+@login_required
+def edit_address(request, pk):
+    specific_address = models.Address.objects.filter(id=pk).first()
+    context = {'address_form': forms.AddressForm(
+        request.POST or None,
+        instance=specific_address
+    )}
+    if not request.user.userprofile == specific_address.user:
+        messages.error(request, 'Not allowed')
+        return redirect('product:list')
+
+    if request.method == 'POST':
+        specific_address = context['address_form'].save(commit=False)
+        specific_address.user = request.user.userprofile
+        specific_address.save()
+        print('Why isn"t it saving?')
+        messages.success(request, 'Endereço alterado com sucesso')
+        return redirect('profile:update')
+
+    return render(request, 'profiles/new_address.html', context)
 
 
 class Logout(View):
