@@ -2,7 +2,7 @@ from django.contrib import admin
 from . import models
 
 
-class AddressInline(admin.TabularInline):
+class AddressInline(admin.StackedInline):
     model = models.Address
     extra = 1
 
