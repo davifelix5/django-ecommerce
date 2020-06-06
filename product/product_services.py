@@ -18,6 +18,10 @@ def get_products():
     return models.Product.objects.order_by('-id')
 
 
+def check_stock(pk):
+    return (get_variation(pk).stock > 1)
+
+
 def add_to_cart(request, pk):
     previous_url = request.META.get('HTTP_REFERER')
 
@@ -31,11 +35,12 @@ def add_to_cart(request, pk):
     image = product.image.name if product.image else ''
 
     if variation.stock < 1:
-        messages.add_message(
+        messages.warning(
             request,
-            messages.WARNING,
-            f'Desculpe, não temos mais estoque desse produto!'
+            f'Desculpe, não temos mais estoque para "{variation.product.name}'
+            f' {variation.name}"!'
         )
+        return False
 
     if not request.session.get('cart'):
         request.session['cart'] = {}
@@ -46,16 +51,12 @@ def add_to_cart(request, pk):
     if pk in cart:
         amount = cart[pk]['amount']
         amount += 1
-
-        if variation.stock < amount:
-            messages.add_message(request, messages.WARNING,
-                                 f'Estoque insuficiente para o produto "{product.name}"')
-
-            return False
-
-        cart[pk]['amount'] = amount
         cart[pk]['subtotal'] = price * amount
         cart[pk]['promo_subtotal'] = promo_price * amount
+        cart[pk]['amount'] = amount
+        print(cart)
+        print('salve')
+        request.session.save()
 
     else:
         cart[pk] = {
@@ -73,5 +74,33 @@ def add_to_cart(request, pk):
             'amount': 1
         }
 
+    variation.stock -= 1
+    variation.save()
     request.session.save()
     return True
+
+
+def remove_from_cart(request, variation_id, amount=False):
+    variation = get_variation(variation_id)
+
+    if amount:
+        amount = int(amount)
+        cart = request.session['cart'][variation_id]
+
+        cart['promo_subtotal'] -= cart['promo_price'] * amount
+        cart['subtotal'] -= cart['price'] * amount
+
+        cart['amount'] -= amount
+
+        if cart['amount'] == 0:
+            del request.session['cart'][variation_id]
+
+        variation.stock += amount
+        variation.save()
+        request.session.save()
+        return
+
+    variation.stock += request.session['cart'][variation_id]['amount']
+    del request.session['cart'][variation_id]
+    variation.save()
+    request.session.save()

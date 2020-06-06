@@ -36,7 +36,7 @@
                         Mais informações
                         <i class="fa fa-plus" aria-hidden="true"></i>
                     </a>
-                    <a href="{% url 'product:cart_add' %}?vid={{ product.id }}" class="btn btn-primary btn-sm m-1 btn-block">
+                    <a href="{% url 'product:cart_add' %}?vid={{ product.variation_set.all.first.id }}" class="btn btn-primary btn-sm m-1 btn-block">
                         <i class="fa fa-cart-plus" aria-hidden="true"></i>
                     </a>
                 </div>

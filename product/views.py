@@ -50,24 +50,19 @@ class AddToCart(View):
     """
 
     def get(self, *args, **kwargs):
-        # TODO Tentar colocar o índide da variação mais barata no list
-        # TODO Adicionar ao carrinho pela página de carrinho
-        # TODO Parar de passar a request pro product_services
         previous_url = self.request.META.get('HTTP_REFERER')
         variation_id = self.request.GET.get('vid')
 
         if not previous_url:
-            messages.add_message(
+            messages.error(
                 self.request,
-                messages.ERROR,
                 'Erro! Adicione o produto novamente ao carrinho'
             )
             return redirect('product:list')
 
         if not variation_id:
-            messages.add_message(
+            messages.error(
                 self.request,
-                messages.ERROR,
                 'Esse produto não exite'
             )
             return redirect(previous_url)
@@ -75,8 +70,7 @@ class AddToCart(View):
         cart = product_services.add_to_cart(self.request, variation_id)
 
         if cart:
-            messages.add_message(self.request, messages.SUCCESS,
-                                 'Produto adicionado ao carrinho!')
+            messages.success(self.request, 'Produto adicionado ao carrinho!')
 
         return redirect(previous_url)
 
@@ -87,45 +81,40 @@ class RemoveFromCart(View):
         variation_id = self.request.GET.get('vid')
 
         if not previous_url:
-            messages.add_message(
+            messages.error(
                 self.request,
-                messages.ERROR,
                 'Erro! Tente remover novamente'
             )
             return redirect('product:list')
 
         if not variation_id:
-            messages.add_message(
+            messages.error(
                 self.request,
-                messages.ERROR,
                 'Esse produto não exite'
             )
             return redirect(previous_url)
 
         if not self.request.session['cart']:
-            messages.add_message(
+            messages.error(
                 self.request,
-                messages.ERROR,
                 'Erro! Não há um carrinho registrado nessa sessão'
             )
             return redirect(previous_url)
 
         if not variation_id in self.request.session['cart']:
-            messages.add_message(
+            messages.error(
                 self.request,
-                messages.ERROR,
                 'Esse produto não está em seu carrinho'
             )
             return redirect(previous_url)
 
-        messages.add_message(
+        messages.success(
             self.request,
-            messages.SUCCESS,
             'Produto removido com sucesso'
         )
 
-        del self.request.session['cart'][variation_id]
-        self.request.session.save()
+        amount = self.request.GET.get('amount')
+        product_services.remove_from_cart(self.request, variation_id, amount)
         return redirect(previous_url)
 
 
@@ -138,22 +127,26 @@ class OrderInfo(View):
             return redirect('profile:login')
 
         if not self.request.session.get('cart'):
-            messages.info(self.request, 'Adicione produtos ao seu carrinho!')
+            messages.info(
+                self.request, 'Primeiro adicione produtos ao seu carrinho!')
             return redirect('product:list')
 
         self.addresses = self.request.user.userprofile.address_set
+
+        address = self.request.GET.get('changeAddress')
         self.context = {
             'user': self.request.user,
             'cart': self.request.session.get('cart'),
             'main_address': self.addresses.all().first(),
-            'other_addresses': self.addresses.all()[1:]
         }
-
-        address = self.request.GET.get('changeAddress')
         if address:
             address = int(address)
             self.context['main_address'] = self.addresses.filter(
                 id=address).first()
+
+        self.context['other_addresses'] = self.addresses.exclude(
+            id=self.context['main_address'].id
+        )
 
         if not self.request.session.get('cart'):
             messages.info(self.request, 'Adicione produtos ao seu carrinho!')
