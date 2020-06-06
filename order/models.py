@@ -19,6 +19,8 @@ class Order(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE,
                              null=False, blank=False, verbose_name="Usuário")
     total_price = models.FloatField(verbose_name="Preço total do pedido")
+    amount = models.PositiveIntegerField(
+        verbose_name="Quantidade total de produtos")
     status = models.CharField(max_length=1, choices=STATUS, default='C',
                               verbose_name="Status do pedido")
 
@@ -48,6 +50,10 @@ class OrderItem(models.Model):
         max_length=80, verbose_name="Nome da variação", blank=True, null=True)
     variation_id = models.PositiveIntegerField(verbose_name="ID da variação")
     total_price = models.FloatField(verbose_name="Preço total")
+    total_promo_price = models.FloatField(
+        verbose_name="Preço promocional total")
+    amount = models.PositiveIntegerField(
+        verbose_name="Quantidade total do produto")
     # O tamanho do caminho da imagem pode ser muito grande
     image_path = models.CharField(
         max_length=2000, verbose_name="Caminho da imagem do produto")
