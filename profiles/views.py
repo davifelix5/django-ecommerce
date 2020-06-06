@@ -1,4 +1,5 @@
 from django.http import HttpResponseRedirect
+from django.core.exceptions import PermissionDenied
 from django.shortcuts import render, redirect, get_object_or_404, reverse
 from django.views.generic import ListView
 from django.views import View
@@ -92,8 +93,7 @@ class SignIn(View):
 
 
 class Update(View):
-
-    # TODO Dar a opção de listar e adicionar mais de um endereço
+    # TODO Corrigir métodos adicionando o get_context_data()
 
     template_name = 'profiles/update.html'
 
@@ -124,10 +124,8 @@ class Update(View):
         self.redirect = 'profile:update'
 
     def get(self, *args, **kwargs):
-        print('oi')
         edit_id = self.request.GET.get('changeAddress')
         if edit_id:
-            print('oi')
             return HttpResponseRedirect(reverse('profile:edit_address', kwargs={'pk': int(edit_id)}))
 
         return render(self.request, self.template_name, self.context)
@@ -192,24 +190,25 @@ class Login(View):
 
         username = self.login_form.cleaned_data.get('username')
         password = self.login_form.cleaned_data.get('password')
-        user = authenticate(self.request, username=username, password=password)
+        user = authenticate(self.request, username=username,
+                            password=password)
+
         if user:
             login(self.request, user)
-
             if self.request.session.get('next_page'):
                 messages.success(
                     self.request, 'Logado com sucesso. Continua sua compra!')
                 del self.request.session['next_page']
                 return redirect('product:info')
 
-            messages.add_message(
-                self.request, messages.SUCCESS, 'Logado com sucesso')
+            messages.success(
+                self.request, 'Logado com sucesso')
             return redirect('product:list')
 
-        messages.add_message(self.request, messages.ERROR,
-                             'Dados incorretos! Tente novamente.')
+        messages.error(self.request, 'Dados incorretos! Tente novamente.')
 
-        return self.request.session.get('next_page', 'profile:login')
+        next_page = self.request.session.get('next_page', 'profile:login')
+        return redirect(next_page)
 
 
 class NewAddress(View):
@@ -222,6 +221,8 @@ class NewAddress(View):
         self.address_form = self.context.get('address_form')
 
     def get(self, *args, **kwargs):
+        if not self.request.user.is_authenticated:
+            return redirect('profile:login')
         return render(self.request, 'profiles/new_address.html', self.context)
 
     def post(self, *args, **kwargs):
@@ -244,14 +245,12 @@ def edit_address(request, pk):
         instance=specific_address
     )}
     if not request.user.userprofile == specific_address.user:
-        messages.error(request, 'Not allowed')
-        return redirect('product:list')
+        raise PermissionDenied()
 
     if request.method == 'POST':
         specific_address = context['address_form'].save(commit=False)
         specific_address.user = request.user.userprofile
         specific_address.save()
-        print('Why isn"t it saving?')
         messages.success(request, 'Endereço alterado com sucesso')
         return redirect('profile:update')
 
@@ -261,7 +260,9 @@ def edit_address(request, pk):
 class Logout(View):
 
     def get(self, *args, **kwargs):
-        # TODO Dar a opção de listar e adicionar mais de um endereço
+        if not self.request.user.is_authenticated:
+            return redirect('profile:login')
+
         cart = self.request.session.get('cart', '')
         copy_cart = deepcopy(cart)
         logout(self.request)
