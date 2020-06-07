@@ -9,27 +9,39 @@ import utils.cart as cart_utils
 from copy import deepcopy
 
 
-class LoginRequireMixin(View):
+class SafetyMixin(View):
     def dispatch(self, *args, **kwargs):
-
         if not self.request.user.is_authenticated:
             messages.warning(self.request, 'Faça login primeiro!')
             self.request.session['next_page'] = 'order:finish'
             return redirect('profile:login')
-
         return super().dispatch(*args, **kwargs)
-
-
-class Pay(LoginRequireMixin, DetailView):
-    template_name = 'order/pay.html'
-    model = Order
-    pk_url_kwarg = 'pk'
-    context_object_name = 'order'
 
     def get_queryset(self, *args, **kwargs):
         queryset = super().get_queryset(*args, **kwargs)
         queryset = queryset.filter(user=self.request.user)
         return queryset
+
+
+class Details(SafetyMixin, DetailView):
+    model = Order
+    context_object_name = 'order'
+    template_name = 'order/details.html'
+    pk_url_kwarg = 'pk'
+
+
+class List(SafetyMixin, ListView):
+    model = Order
+    context_object_name = 'orders'
+    template_name = 'order/list.html'
+    paginate_by = 5
+
+
+class Pay(SafetyMixin, DetailView):
+    template_name = 'order/pay.html'
+    model = Order
+    pk_url_kwarg = 'pk'
+    context_object_name = 'order'
 
 
 class Finish(View):
@@ -81,8 +93,3 @@ class Finish(View):
         # Aqui redirecionaria para o serciço de pagar com uma mensagem
         messages.success(self.request, 'Pedido registrado com sucesso')
         return redirect(reverse('order:pay', kwargs={'pk': order.id}))
-
-
-class Details(View):
-    def get(self, *args, **kwargs):
-        return HttpResponse('Details')
