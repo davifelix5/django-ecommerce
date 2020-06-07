@@ -5,6 +5,7 @@ from django.views import View
 from django.contrib import messages
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q
 from . import models
 from . import product_services
 
@@ -17,7 +18,16 @@ class ListProducts(ListView):
     paginate_orphans = 3
 
     def get_queryset(self):
-        return product_services.get_products()
+        filter_str = self.request.GET.get('filter')
+        qs = product_services.get_products()
+        if not filter_str:
+            return qs
+        qs = qs.filter(
+            Q(name__icontains=filter_str) |
+            Q(short_desc__icontains=filter_str) |
+            Q(long_desc__icontains=filter_str)
+        )
+        return qs
 
 
 class ProductsDetails(DetailView):
