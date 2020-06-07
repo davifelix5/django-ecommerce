@@ -23,6 +23,7 @@ class Order(models.Model):
         verbose_name="Quantidade total de produtos")
     status = models.CharField(max_length=1, choices=STATUS, default='C',
                               verbose_name="Status do pedido")
+    creation_date = models.DateField(auto_now_add=True)
 
     def __str__(self):
         # Pega a primary key
