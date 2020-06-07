@@ -137,7 +137,7 @@ class Update(View):
                 not self.profileform.is_valid():
 
             print('Ficou inválido')
-            return redirect('profile:update')
+            return render(self.request, self.template_name, self.context)
 
         password = self.userform.cleaned_data.get('password', '')
 

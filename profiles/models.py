@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.forms import ValidationError
 from utils.validate_cpf import validate_cpf
+import utils.validate_cpf as validade_cpf
 import re
 
 
@@ -14,13 +15,20 @@ class UserProfile(models.Model):
     user = models.OneToOneField(
         User, on_delete=models.CASCADE, verbose_name="Usuário")
     birth = models.DateField(verbose_name="Data de nascimento")
-    cpf = models.CharField(max_length=11, verbose_name="CPF")
+    cpf = models.CharField(max_length=11, verbose_name="CPF", unique=True)
 
     def __str__(self):
         return f'{self.user.first_name} {self.user.last_name}'
 
     def clean(self):
         error_messages = {}
+
+        user_with_cpf = UserProfile.objects.filter(cpf=self.cpf).first()
+
+        # Se houver um perfil com esse CPF que tiber ID diferente do profile
+        # sendo registrado no momento
+        if user_with_cpf and self.pk != user_with_cpf.pk:
+            error_messages['cpf'] = 'Esse CPF já está cadastrado!'
 
         if not validate_cpf(self.cpf):
             error_messages['cpf'] = 'Digite um CPF válido'

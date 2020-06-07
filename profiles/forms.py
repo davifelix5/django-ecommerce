@@ -28,7 +28,7 @@ class UserForm(forms.ModelForm):
         form_password = clean_data.get('password', '')
         form_password2 = clean_data.get('password2', '')
 
-        self.template_method(
+        self.validate_all(
             form_user,
             form_email,
             form_password,
@@ -55,8 +55,10 @@ class UserForm(forms.ModelForm):
             if len(pass1) < 6:
                 self.error_messages['password'] = 'Senha deve pelo mesno 6 caracteres'
 
-    def template_method(self, user, email, password1, password2):
-        pass
+    def validate_all(self, user, email, password1, password2):
+        self.validate_username(user)
+        self.validate_email(email)
+        self.validate_password(password1, password2)
 
 
 class UserFormCreate(UserForm):
@@ -83,11 +85,6 @@ class UserFormCreate(UserForm):
         label='Repetição da senha'
     )
 
-    def template_method(self, user, email, password1, password2):
-        self.validate_username(user)
-        self.validate_email(email)
-        self.validate_password(password1, password2)
-
 
 class UserFormUpdate(UserForm):
 
@@ -110,13 +107,15 @@ class UserFormUpdate(UserForm):
         help_text='Deixe vazio para não alterar sua senha'
     )
 
+    def validate_email(self, email):
+        user_with_email = User.objects.filter(email=email).first()
+        if user_with_email and user_with_email.pk != self.instance.pk:
+            self.error_messages['email'] = 'Esse email já foi cadastrado'
+
     def validate_password(self, pass1, pass2):
         if not pass1 or not pass2:
             return
         super().validate_password(pass1, pass2)
-
-    def template_method(self, user, email, password1, password2):
-        self.validate_password(password1, password2)
 
 
 class AddressForm(forms.ModelForm):
