@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load my_filters %}
+{% load static %}
 
 
 {% block 'title' %}Produtos | {% endblock 'title' %}
@@ -12,7 +13,7 @@
             <div class="card">
                 {% if product.image %}
                 <a href="{% url 'product:details' product.slug %}">
-                <img class="card-img-top" src="{{ product.image.url }}" alt="Imagem do produto {{ product.name }}">
+                <img class="card-img-top" src="{% get_media_prefix %}{{ product.image }}" alt="Imagem do produto {{ product.name }}">
                 </a>
                 {% endif %}
                 <div class="card-body">
@@ -38,7 +39,7 @@
                         Mais informações
                         <i class="fa fa-plus" aria-hidden="true"></i>
                     </a>
-                    <a href="{% url 'product:cart_add' %}?vid={{ product.variation_set.all.first.id }}" class="btn btn-primary btn-sm m-1 btn-block">
+                    <a href="{% url 'product:cart_add' %}?vid={{ product.v_id }}" class="btn btn-primary btn-sm m-1 btn-block">
                         <i class="fa fa-cart-plus" aria-hidden="true"></i>
                     </a>
                 </div>

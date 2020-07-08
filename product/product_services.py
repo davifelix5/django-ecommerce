@@ -2,6 +2,7 @@ from product import models
 from django.shortcuts import get_object_or_404
 from django.shortcuts import redirect
 from django.contrib import messages
+from django.db.models import Window, Q, Min
 
 
 def get_variations(product_obj):
@@ -15,7 +16,22 @@ def get_variation(pk):
 
 
 def get_products():
-    return models.Product.objects.order_by('-id')
+    # TODO transformar isso pra ORM
+    return models.Variation.objects.raw('''
+        SELECT product.*, variation.id AS v_id, variation.price, variation.price_promo
+        FROM product_product AS product
+        JOIN product_variation AS variation
+        ON product.id = variation.product_id
+        WHERE variation.price = (
+            SELECT Min(v.price)
+            FROM product_variation AS v
+            JOIN product_product AS p
+            ON p.id = v.product_id
+            WHERE p.id = product.id
+        )
+        GROUP BY product.id
+        ORDER BY product.id DESC;
+    ''')
 
 
 def check_stock(pk):
@@ -54,8 +70,6 @@ def add_to_cart(request, pk):
         cart[pk]['subtotal'] = price * amount
         cart[pk]['promo_subtotal'] = promo_price * amount
         cart[pk]['amount'] = amount
-        print(cart)
-        print('salve')
         request.session.save()
 
     else:
@@ -80,7 +94,7 @@ def add_to_cart(request, pk):
     return True
 
 
-def remove_from_cart(request, variation_id, amount=False):
+def remove_from_cart(request, variation_id, amount=0):
     variation = get_variation(variation_id)
 
     if amount:
