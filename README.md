@@ -29,5 +29,3 @@
       - Order: Armezana os itens do pedido, guarda a data do pedido e o preço total
       - OrderItem: Guarda as variações que compoem certo pedido
       - Foram feitos models separados para que uma mudança no e-commerce depois da compra do usuário não altere o seu pedido
-      
-    
