@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.views import View
@@ -109,7 +109,7 @@ class RemoveFromCart(View):
             )
             return redirect(previous_url)
 
-        if not variation_id in self.request.session['cart']:
+        if variation_id not in self.request.session['cart']:
             messages.error(
                 self.request,
                 'Esse produto não está em seu carrinho'
@@ -141,16 +141,19 @@ class OrderInfo(View):
 
         self.addresses = self.request.user.userprofile.address_set
 
-        address = self.request.GET.get('changeAddress')
+        address = self.request.GET.get('change-address')
         self.context = {
             'user': self.request.user,
             'cart': self.request.session.get('cart'),
             'main_address': self.addresses.all().first(),
         }
+
         if address:
-            address = int(address)
-            self.context['main_address'] = self.addresses.filter(
-                id=address).first()
+            address_id = int(address)
+            self.context['main_address'] = get_object_or_404(
+                self.addresses.all(),
+                id=address_id
+            )
 
         self.context['other_addresses'] = self.addresses.exclude(
             id=self.context['main_address'].id

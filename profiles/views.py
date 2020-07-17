@@ -1,9 +1,7 @@
 from django.http import HttpResponseRedirect
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import render, redirect, get_object_or_404, reverse
-from django.views.generic import ListView
 from django.views import View
-from django.http import HttpResponse
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -89,7 +87,7 @@ class SignIn(View):
         if auth:
             login(self.request, user=user)
 
-        return redirect('procuct:list')
+        return redirect('product:list')
 
 
 class Update(View):
@@ -195,11 +193,12 @@ class Login(View):
 
         if user:
             login(self.request, user)
-            if self.request.session.get('next_page'):
+            next_page = self.request.session.get('next_page')
+            if next_page:
                 messages.success(
                     self.request, 'Logado com sucesso. Continua sua compra!')
                 del self.request.session['next_page']
-                return redirect('product:info')
+                return redirect(next_page)
 
             messages.success(
                 self.request, 'Logado com sucesso')

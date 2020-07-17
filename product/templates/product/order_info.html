@@ -67,7 +67,7 @@
                     <dd class="col-lg-4">{{address.cep}}</dd>
                 </dl>
                 {% endfor %}
-                <select name="changeAddress" id="changeAddress"  class="mb-3">
+                <select name="change-address" id="changeAddress"  class="mb-3">
                     <option>Selecionar endereços</option>
                     {% for address in other_addresses %}
                     <option value="{{address.id}}">{{address.street}}</option>

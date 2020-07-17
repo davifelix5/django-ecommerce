@@ -18,7 +18,9 @@ def get_variation(pk):
 def get_products():
     # TODO transformar isso pra ORM
     return models.Variation.objects.raw('''
-        SELECT product.*, variation.id AS v_id, variation.price, variation.price_promo
+        SELECT product.*, variation.id AS v_id,
+        variation.price AS v_price,
+        variation.price_promo AS v_price_promo
         FROM product_product AS product
         JOIN product_variation AS variation
         ON product.id = variation.product_id

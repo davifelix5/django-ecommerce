@@ -1,16 +1,18 @@
 (function () {
     console.log('salve')
-    let backupAdresses = document.querySelectorAll('.backupAddress')
-    let select = document.querySelector('#changeAddress')
-    let submitButton = document.querySelector('#submitChangeAddress')
+    const backupAdresses = document.querySelectorAll('.backupAddress')
+    const select = document.querySelector('#changeAddress')
+    const submitButton = document.querySelector('#submitChangeAddress')
 
     select.addEventListener('change', function () {
-        let selectedAddress = this.options[this.selectedIndex].value
-        if (selectedAddress.length > 1) {
+        const selectedAddress = this.options[this.selectedIndex].value
+        
+        if (isNaN(selectedAddress)) {
             submitButton.classList.add('hidden')
         } else {
             submitButton.classList.remove('hidden')
         }
+        
         backupAdresses.forEach(item => {
             item.classList.add('hidden')
         })

@@ -35,7 +35,7 @@
 <div class="col d-flex flex-column align-items-center">
             
     <h1 class="text-primary mb-4">Seus endereços</h1>
-    <dl class="row backupAddress" address="{{address.id}}">
+    <dl class="row backupAddress" address="{{main_address.id}}">
 
         <dt class="col-lg-2">Endereço:</dt>
         <dd class="col-lg-4">{{main_address.street }}</dd>
@@ -77,16 +77,16 @@
         <dd class="col-lg-4">{{address.cep}}</dd>
     </dl>
     {% endfor %}
-    <form method="GET" class="d-flex flex-column">
-    <button type="submit" class="btn btn-sm btn-secondary" id="submitChangeAddress">
-        Editar esse endereço
-    </button>
-    <select name="changeAddress" id="changeAddress"  class="mb-3">
+    <form method="GET" class="d-flex flex-column w-100" >
+    <select name="changeAddress" id="changeAddress" class="mb-3 w-100 p-2" >
         <option value="{{main_address.id}}">{{main_address.street}}</option>
         {% for address in other_addresses %}
         <option value="{{address.id}}">{{address.street}}</option>
         {% endfor %}
     </select>
+    <button type="submit" class="btn btn-md btn-secondary align-self-end mb-2" id="submitChangeAddress">
+        Editar esse endereço
+    </button>
     </form>
     
     <a href="{% url 'profile:address' %}" class="btn btn-primary btn-lg btn-block mt-3">
