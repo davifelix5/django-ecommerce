@@ -9,37 +9,37 @@
 <div class="row">
     <div class="col-lg-12">
         <div class="card-columns">
-            {% for product in products %}
+            {% for variation in products %}
             <div class="card">
-                {% if product.image %}
-                <a href="{% url 'product:details' product.slug %}">
-                <img class="card-img-top" src="{% get_media_prefix %}{{ product.image }}" alt="Imagem do produto {{ product.name }}">
+                {% if variation.product.image %}
+                <a href="{% url 'product:details' variation.product.slug %}">
+                <img class="card-img-top" src="{% get_media_prefix %}{{ variation.product.image }}" alt="Imagem do produto {{ variation.product.name }}">
                 </a>
                 {% endif %}
                 <div class="card-body">
-                    <h5 class="card-title">{{ product.name }}</h5>
-                    <p class="card-text">{{ product.short_desc }}</p>
+                    <h5 class="card-title">{{ variation.product.name }} {% if variation.product.prod_type == 'V' %} - {{ variation.name }} {% endif %}</h5>
+                    <p class="card-text">{{ variation.product.short_desc }}</p>
                     <div class="container product-price-block text-center">
-                        {% if product.price_promo %}
+                        {% if variation.price_promo %}
                         <span class="product-price">
-                            {{ product.price_promo|money }}
+                            {{ variation.price_promo|money }}
                         </span>
                         <span class="product-old-price text-muted">
-                            {{ product.price_display|money }}
+                            {{ variation.price|money }}
                         </span>
                         {% else %}
                         <span class="product-price">
-                            {{ product.price_display|money }}
+                            {{ variation.price|money }}
                         </span>
                         {% endif %}
                     </div>
                 </div>
                 <div class="card-footer bg-transparent border-top-light-custom text-center cart-links">
-                    <a href="{% url 'product:details' product.slug %}" class="btn btn-primary btn-sm m-1 btn-block">
+                    <a href="{% url 'product:details' variation.product.slug %}" class="btn btn-primary btn-sm m-1 btn-block">
                         Mais informações
                         <i class="fa fa-plus" aria-hidden="true"></i>
                     </a>
-                    <a href="{% url 'product:cart_add' %}?vid={{ product.v_id }}" class="btn btn-primary btn-sm m-1 btn-block">
+                    <a href="{% url 'product:cart_add' %}?vid={{ variation.id }}" class="btn btn-primary btn-sm m-1 btn-block">
                         <i class="fa fa-cart-plus" aria-hidden="true"></i>
                     </a>
                 </div>

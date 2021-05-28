@@ -17,23 +17,19 @@ def get_variation(pk):
 
 def get_products():
     # TODO transformar isso pra ORM
-    return models.Variation.objects.raw('''
-        SELECT product.*, variation.id AS v_id,
-        variation.price AS v_price,
-        variation.price_promo AS v_price_promo
-        FROM product_product AS product
-        JOIN product_variation AS variation
-        ON product.id = variation.product_id
-        WHERE variation.price = (
-            SELECT Min(v.price)
-            FROM product_variation AS v
-            JOIN product_product AS p
-            ON p.id = v.product_id
-            WHERE p.id = product.id
+    result =[]
+    for product in models.Product.objects.all().order_by('-id'):
+        promo = models.Variation.objects.select_related('product')\
+            .filter(product__id=product.id, price_promo__gt=0)\
+                .order_by('price_promo').first()
+        cheaper = models.Variation.objects.select_related('product')\
+            .filter(product__id=product.id).order_by('price').first()
+        
+        result.append(
+            promo or cheaper
         )
-        GROUP BY product.id
-        ORDER BY product.id DESC;
-    ''')
+
+    return result
 
 
 def check_stock(pk):

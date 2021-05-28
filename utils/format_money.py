@@ -1,9 +1,6 @@
 import locale
 import re
 
-locale.setlocale(locale.LC_MONETARY, 'pt-br')
-
-
 def format_value(value):
     return locale.currency(value, grouping=True)
 
