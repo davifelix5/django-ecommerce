@@ -68,7 +68,7 @@ class Variation(models.Model):
                             null=True, verbose_name="Nome da variação")
     price = models.FloatField(verbose_name="Preço padrão")
     price_promo = models.FloatField(
-        verbose_name="Produto promocional", blank=True, default=0)
+        verbose_name="Produto promocional", blank=True, default=None, null=True)
     stock = models.PositiveIntegerField(
         default=1, verbose_name="Quantidade em estoque")
 
