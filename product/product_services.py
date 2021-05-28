@@ -16,14 +16,14 @@ def get_variation(pk):
 
 
 def get_products():
-    # TODO transformar isso pra ORM
-    result =[]
-    for product in models.Product.objects.all().order_by('-id'):
-        promo = models.Variation.objects.select_related('product')\
-            .filter(product__id=product.id, price_promo__gt=0)\
-                .order_by('price_promo').first()
-        cheaper = models.Variation.objects.select_related('product')\
-            .filter(product__id=product.id).order_by('price').first()
+    result = []
+    products = models.Product.objects.all().order_by('-id')
+    for product in products:
+        variations = models.Variation.objects.select_related('product')\
+            .filter(product__id=product.id)
+        
+        promo = variations.filter(price_promo__gt=0).order_by('price_promo').first()
+        cheaper = variations.order_by('price').first()
         
         result.append(
             promo or cheaper
